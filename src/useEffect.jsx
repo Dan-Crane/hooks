@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 
 export const UseEffect = () => {
 	const [count, setCount] = useState(1)
@@ -29,18 +29,17 @@ const getPlanet = (id) => {
 }
 
 const useRequest = (request) => {
-	const [dataState, setDataState] = useState({
-		data: null,
-		loading: true,
-		error: null
-	})
+
+const initialState = useMemo(()=>({
+	data: null,
+	loading: true,
+	error: null
+}), [])
+
+	const [dataState, setDataState] = useState(initialState)
 
 	useEffect(() => {
-		setDataState({
-			data: null,
-			loading: true,
-			error: null
-		})
+		setDataState(initialState)
 		let cancelled = false
 		request()
 			.then(data => !cancelled && setDataState({
@@ -48,13 +47,13 @@ const useRequest = (request) => {
 				loading: false,
 				error: null
 			}))
-			.catch(err=> !cancelled && setDataState({
+			.catch(err => !cancelled && setDataState({
 				data: null,
 				loading: false,
 				error: err
 			}))
 		return () => cancelled = true
-	}, [request])
+	}, [request, initialState])
 
 	return dataState
 }
